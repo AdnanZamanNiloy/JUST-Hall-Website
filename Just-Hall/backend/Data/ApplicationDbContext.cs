@@ -17,6 +17,7 @@ namespace JustHallAPI.Data
         public DbSet<Application> Applications { get; set; }
         public DbSet<Notice> Notices { get; set; }
         public DbSet<SeatAllocation> SeatAllocations { get; set; }
+        public DbSet<Payment> Payments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -84,6 +85,26 @@ namespace JustHallAPI.Data
             {
                 entity.ToTable("notices_notice");
                 entity.HasKey(e => e.Id);
+            });
+
+            // Payment configuration
+            modelBuilder.Entity<Payment>(entity =>
+            {
+                entity.ToTable("payments_payment");
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.TransactionId).IsUnique();
+                entity.HasIndex(e => e.StudentId);
+                entity.HasIndex(e => e.Status);
+                
+                entity.HasOne(p => p.Student)
+                    .WithMany()
+                    .HasForeignKey(p => p.StudentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                
+                entity.HasOne(p => p.Verifier)
+                    .WithMany()
+                    .HasForeignKey(p => p.VerifiedBy)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }
